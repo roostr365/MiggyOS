@@ -10,7 +10,4 @@ class LocomotionDriver:
         self.client.Move(0, 0, 0)
 
     def move_dist(self, dist, speed):
-        pass
-
-    def get_state(self):
-        pass
+        self.client.Move(speed, 0, 0)
