@@ -1,4 +1,4 @@
-print("Loading MiggyOS TM...")
+print("Loading MiggyOS TM Copyright 2026 All Rights Reserved by The Miggy...")
 
 import sys
 from unitree_sdk2py.core.channel import ChannelFactoryInitialize
