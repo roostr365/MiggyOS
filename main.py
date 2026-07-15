@@ -8,4 +8,13 @@ ChannelFactoryInitialize(0, sys.argv[1])
 print("Connected Succesfully!")
 
 miggy = Niggy()
+commands = {1: "quit"}
+
+def list_commands():
+    for cmd in commands:
+        print(cmd)
+
+running = True
+while running:
+    command = input("Enter command: ")
 
