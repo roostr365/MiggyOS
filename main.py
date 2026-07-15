@@ -16,5 +16,9 @@ def list_commands():
 
 running = True
 while running:
+    list_commands()
     command = input("Enter command: ")
+
+    if command == "quit":
+        running = False
 
