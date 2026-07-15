@@ -1,15 +1,10 @@
 print("Loading MiggyOS TM Copyright 2026 All Rights Reserved by The Miggy...")
 
 import sys
-from unitree_sdk2py.core.channel import ChannelFactoryInitialize
 from Miggy import Miggy
 
-ChannelFactoryInitialize(0, sys.argv[1])
-print("Connected Succesfully!")
-
-miggy = Miggy()
+miggy = Miggy(sys.argv[1])
 commands = {"quit": "Quit the MiggyOS", "move": "Move the robot forward", "rotate": "Rotate the robot"}
-running = True
 
 def list_commands():
     for cmd in commands:
@@ -17,10 +12,19 @@ def list_commands():
         print(commands[cmd])
 
 running = True
-while running:
-    list_commands()
-    command = input("Enter command: ")
+try:
+    while running:
+        list_commands()
+        command = input("Enter command: ")
 
-    if command == "quit":
-        running = False
+        if command == "quit":
+            miggy.stop()
+        elif command == "move":
+            distance = float(input("Enter distance: "))
+            speed = float(input("Enter speed: "))
+            miggy.move()
+except KeyboardInterrupt:
+    miggy.stop()
+
+
 
