@@ -1,0 +1,77 @@
+from openai import OpenAI, api_key
+#from Miggy import Miggy
+import math
+
+preprompt = """
+You control a Unitree G1 robot through the MiggyOS Python API.
+
+Available commands:
+
+Miggy.move_dist(distance: float, speed: float)
+- distance: meters. Positive = forward, negative = backward.
+- speed: meters per second.
+
+Miggy.rotate(angle: float, speed: float)
+- angle: radians. Positive = counterclockwise, negative = clockwise.
+- speed: radians per second.
+
+Available libraries already imported:
+import math
+import time
+
+Your output will be directly executed using Python exec().
+
+Rules:
+1. Output ONLY valid Python code.
+2. Do not use markdown.
+3. Do not include explanations or comments.
+4. Do not create new classes or functions.
+5. Only use Miggy.move_dist(), Miggy.rotate(), math, and time.sleep().
+6. If multiple actions are needed, separate statements with semicolons.
+7. Convert degrees to radians using math.radians().
+8. Never output anything except executable Python.
+
+Examples:
+
+User: Walk forward 2 meters
+Output:
+Miggy.move_dist(2.0,0.5)
+
+User: Turn right 90 degrees then walk 1 meter
+Output:
+Miggy.rotate(math.radians(-90),1.0); Miggy.move_dist(1.0,0.5)
+
+"""
+
+class AIMiggy:
+
+    def __init__(self):
+        self.client = OpenAI(
+            base_url="https://integrate.api.nvidia.com/v1",
+            api_key="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"
+        )
+
+    def askAIMiggy(self, query):
+        response = self.client.responses.create(
+            model="openai/gpt-oss-120b",
+            input=preprompt + query,
+            max_output_tokens=4096,
+            top_p=1,
+            temperature=1,
+            stream=False
+        )
+
+        return response
+
+    def run(self, query):
+        code = self.askAIMiggy(query).output_text
+        print(code)
+        try:
+            exec(code)
+        except Exception as e:
+            print(e)
+
+
+aim = AIMiggy()
+aim.run("Please walk forward 2 meters and turn around")
+

@@ -14,7 +14,8 @@ commands = {
     "rotate": "Rotate the robot",
     "mar": "Move the robot and rotate the robot",
     "sit": "Sit the robot down",
-    "stand": "Stand the robot up"
+    "stand": "Stand the robot up",
+    "custom": "Use AI to run the robot DANGEROUS WARNING MAY CAUSE ARMAGEDDON AND THE RESURRECTION OF THE TERMINATOR AND ERASURE OF THE HUMAN RACE. USE WITH EXTREME CAUTION. Thanks for using MiggyOS!"
 }
 
 running = True
@@ -45,6 +46,9 @@ try:
             move_dist = float(input("Enter distance: "))
             rotate_angle = float(input("Enter angle: "))
             miggy.rotate_and_move(move_speed, rotate_speed, move_dist, rotate_angle)
+        elif command == "custom":
+            query = input("Enter query for AI: ")
+
 except KeyboardInterrupt:
     miggy.stop()
     print("Exiting... Thanks for using MiggyOS!")
