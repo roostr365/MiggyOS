@@ -22,7 +22,7 @@ try:
         elif command == "move":
             distance = float(input("Enter distance: "))
             speed = float(input("Enter speed: "))
-            miggy.move()
+            miggy.move(distance, speed)
 except KeyboardInterrupt:
     miggy.stop()
 
