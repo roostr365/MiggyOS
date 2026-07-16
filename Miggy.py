@@ -12,10 +12,10 @@ class Miggy:
 
 		self.locomotion = LocomotionDriver(self.client)
 
-	def move(self, distance, speed):
+	def move_dist(self, distance, speed):
 		self.locomotion.move_dist_sleep(distance, speed)
 
-	def rotate(self, angle, speed):
+	def rotate_angle(self, angle, speed):
 		self.locomotion.rotate_radians_sleep(angle, speed)
 
 	def stop(self):

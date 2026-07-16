@@ -26,13 +26,14 @@ try:
         elif command == "move":
             distance = float(input("Enter distance: "))
             speed = float(input("Enter speed: "))
-            miggy.move(distance, speed)
+            miggy.move_dist(distance, speed)
         elif command == "rotate":
             angle = float(input("Enter angle: "))
             speed = float(input("Enter speed: "))
-            miggy.rotate(angle, speed)
+            miggy.rotate_angle(angle, speed)
 except KeyboardInterrupt:
     miggy.stop()
+    print("Exiting... Thanks for using MiggyOS!")
 
 
 
