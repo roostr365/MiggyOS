@@ -20,3 +20,6 @@ class Miggy:
 
 	def stop(self):
 		self.locomotion.stop()
+
+	def rotate_and_move(self, move_speed, rotate_speed, distance, angle):
+		self.locomotion.move_and_rotate(move_speed, rotate_speed, distance, angle)

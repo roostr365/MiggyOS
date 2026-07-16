@@ -31,6 +31,12 @@ try:
             angle = float(input("Enter angle: "))
             speed = float(input("Enter speed: "))
             miggy.rotate_angle(angle, speed)
+        elif command == "mar":
+            move_speed = float(input("Enter move speed: "))
+            rotate_speed = float(input("Enter rotate speed: "))
+            move_dist = float(input("Enter distance: "))
+            rotate_angle = float(input("Enter angle: "))
+            miggy.rotate_and_move(move_speed, rotate_speed, move_dist, rotate_angle)
 except KeyboardInterrupt:
     miggy.stop()
     print("Exiting... Thanks for using MiggyOS!")
