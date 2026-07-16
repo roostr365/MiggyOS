@@ -34,5 +34,21 @@ class LocomotionDriver:
 		time.sleep(abs(move_dist/move_speed))
 		self.stop()
 
+	def stand(self):
+		self.client.Squat2StandUp()
+		time.sleep(5)
+
+	def sit(self):
+		self.client.StandUp2Squat()
+		time.sleep(5)
+
+	def damp(self):
+		self.client.Damp()
+
+	def sit(self):
+		try :
+			self.client.Sit()
+		except Exception as e:
+			print("No sit function" + str(e))
 
  

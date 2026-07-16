@@ -23,3 +23,10 @@ class Miggy:
 
 	def rotate_and_move(self, move_speed, rotate_speed, distance, angle):
 		self.locomotion.move_and_rotate(move_speed, rotate_speed, distance, angle)
+
+	def sit(self):
+		self.locomotion.sit()
+		self.locomotion.damp()
+
+	def stand(self):
+		self.locomotion.stand()

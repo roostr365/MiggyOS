@@ -8,14 +8,22 @@ try:
 except Exception as e:
     print("Failed to connect to the Miggy!!! " + str(e))
     sys.exit(1)
-commands = {"quit": "Quit the MiggyOS", "move": "Move the robot forward", "rotate": "Rotate the robot"}
+commands = {
+    "quit": "Quit the MiggyOS",
+    "move": "Move the robot forward",
+    "rotate": "Rotate the robot",
+    "mar": "Move the robot and rotate the robot",
+    "sit": "Sit the robot down",
+    "stand": "Stand the robot up"
+}
+
+running = True
 
 def list_commands():
     for cmd in commands:
         print(cmd)
         print(commands[cmd])
 
-running = True
 try:
     while running:
         list_commands()
