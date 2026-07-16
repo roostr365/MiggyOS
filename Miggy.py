@@ -57,3 +57,9 @@ class Miggy:
 
 	def say(self, string, language):
 		self.audio.say(string, {"english": 1, "chinese": 0}[language]) if language in ["chinese", "english"] else None
+
+	def check_audio(self):
+		return self.audio.get_latest_message()
+
+	def clear_audio(self):
+		self.audio.clear()

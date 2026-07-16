@@ -1,9 +1,12 @@
 from Miggy import Miggy
+from AIMiggyController import AIMiggy
 
-class TerminalOS:
+import time
+
+class TerminalInterface:
 
     @staticmethod
-    def main(self, miggy):
+    def main(self, miggy, aimiggy):
         commands = {
             "quit": "Quit the MiggyOS",
             "move": "Move the robot forward",
@@ -11,6 +14,7 @@ class TerminalOS:
             "mar": "Move the robot and rotate the robot",
             "sit": "Sit the robot down",
             "stand": "Stand the robot up",
+            "audio": "Listen for a command and give to AI",
             "custom": "Use AI to run the robot DANGEROUS WARNING MAY CAUSE ARMAGEDDON AND THE RESURRECTION OF THE TERMINATOR AND ERASURE OF THE HUMAN RACE. USE WITH EXTREME CAUTION. Thanks for using MiggyOS!"
         }
 
@@ -45,6 +49,13 @@ class TerminalOS:
                 elif command == "custom":
                     query = input("Enter query for AI: ")
                     aimiggy.run(query, miggy)
+                elif command == "audio":
+                    miggy.clear_audio()
+                    command = miggy.check_audio()
+                    while command == None:
+                        time.sleep(1)
+                        command = miggy.check_audio()
+                    aimiggy.run(command, miggy)
 
         except KeyboardInterrupt:
             miggy.stop()

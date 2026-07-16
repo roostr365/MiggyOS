@@ -3,7 +3,8 @@ print("Loading MiggyOS TM Copyright 2026 All Rights Reserved by The Miggy...")
 import sys
 from Miggy import Miggy
 from AIMiggyController import AIMiggy
-from Terminal import TerminalOS
+from Terminal import TerminalInterface
+from Audio import AudioInterface
 
 aimiggy = AIMiggy()
 
@@ -14,8 +15,8 @@ except Exception as e:
     sys.exit(1)
 selection = input("0 for TerminalOS and 1 for Audio")
 if selection == "0":
-    TerminalOS.main(miggy)
+    TerminalInterface.main(miggy, aimiggy)
 elif selection == "1":
-    pass
+    AudioInterface.main(miggy, aimiggy)
 else:
     print("Invalid selection, you sadly will not be able to use the Miggy.")
