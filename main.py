@@ -3,7 +3,11 @@ print("Loading MiggyOS TM Copyright 2026 All Rights Reserved by The Miggy...")
 import sys
 from Miggy import Miggy
 
-miggy = Miggy(sys.argv[1])
+try:
+    miggy = Miggy(sys.argv[1])
+except Exception as e:
+    print("Failed to connect to the Miggy!!! " + str(e))
+    sys.exit(1)
 commands = {"quit": "Quit the MiggyOS", "move": "Move the robot forward", "rotate": "Rotate the robot"}
 
 def list_commands():
