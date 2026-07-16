@@ -30,6 +30,7 @@ class LocomotionDriver:
 			print("Movement canceled.")
 			return
 		self.client.Move(move_speed, 0, rotate_speed, True)
+		print(move_speed, rotate_speed)
 		time.sleep(abs(move_dist/move_speed))
 		self.stop()
 
