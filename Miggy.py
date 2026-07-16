@@ -56,6 +56,4 @@ class Miggy:
 			print(str(e) + " given string not one of the special commands")
 
 	def say(self, string, language):
-		self.audio.say(string, 0) if language == 1 else self.audio.say(string, 1)
-		
-
+		self.audio.say(string, {"english": 1, "chinese": 0}[language]) if language in ["chinese", "english"] else None
