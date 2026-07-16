@@ -9,9 +9,8 @@ class AudioDriver:
         audio_msg_subscriber = ChannelSubscriber("rt/audio_msg", String_)
         audio_msg_subscriber.Init(self.hear, 10)
 
-    def say(self, str):
-        self.client.TtsMaker(str, 0)
+    def say(self, str, lang:int):
+        self.client.TtsMaker(str, lang)
 
     def hear(self, msg: String_):
         return msg.data
-    

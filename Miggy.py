@@ -1,9 +1,10 @@
-from ArmDriver import ArmDriver
 from unitree_sdk2py.core.channel import ChannelFactoryInitialize
 from unitree_sdk2py.g1.loco.g1_loco_client import LocoClient
 from unitree_sdk2py.g1.arm.g1_arm_action_client import G1ArmActionClient
+from unitree_sdk2py.g1.audio.g1_audio_client import AudioClient
 from LocomotionDriver import LocomotionDriver
 from ArmDriver import ArmDriver
+from AudioDriver import AudioDriver
 
 class Miggy:
 	def __init__(self, interface):
@@ -17,8 +18,14 @@ class Miggy:
 		self.arm_client.SetTimeout(10.0)
 		self.arm_client.Init()
 
+		self.audio_client = AudioClient()
+		self.audio_client.SetTimeout(10.0)
+		self.audio_client.Init()
+
 		self.locomotion = LocomotionDriver(self.loco_client)
 		self.arm = ArmDriver(self.arm_client)
+		self.audio = AudioDriver(self.audio_client)
+
 
 	def move_dist(self, distance, speed):
 		self.locomotion.move_dist_sleep(distance, speed)
@@ -47,4 +54,8 @@ class Miggy:
 			self.arm.special(str)
 		except Exception as e:
 			print(str(e) + " given string not one of the special commands")
-			
+
+	def say(self, string, language):
+		self.audio.say(string, 0) if language == 1 else self.audio.say(string, 1)
+		
+
