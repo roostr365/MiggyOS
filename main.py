@@ -2,6 +2,9 @@ print("Loading MiggyOS TM Copyright 2026 All Rights Reserved by The Miggy...")
 
 import sys
 from Miggy import Miggy
+from AIMiggyController import AIMiggy
+
+aimiggy = AIMiggy()
 
 try:
     miggy = Miggy(sys.argv[1])
@@ -48,6 +51,7 @@ try:
             miggy.rotate_and_move(move_speed, rotate_speed, move_dist, rotate_angle)
         elif command == "custom":
             query = input("Enter query for AI: ")
+            aimiggy.run(query, miggy)
 
 except KeyboardInterrupt:
     miggy.stop()
