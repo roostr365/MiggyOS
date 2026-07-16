@@ -3,7 +3,11 @@ print("Loading MiggyOS TM Copyright 2026 All Rights Reserved by The Miggy...")
 import sys
 from Miggy import Miggy
 
-miggy = Miggy(sys.argv[1])
+try:
+    miggy = Miggy(sys.argv[1])
+except Exception as e:
+    print("Failed to connect to the Miggy!!! " + str(e))
+    sys.exit(1)
 commands = {"quit": "Quit the MiggyOS", "move": "Move the robot forward", "rotate": "Rotate the robot"}
 
 def list_commands():
@@ -22,13 +26,14 @@ try:
         elif command == "move":
             distance = float(input("Enter distance: "))
             speed = float(input("Enter speed: "))
-            miggy.move(distance, speed)
+            miggy.move_dist(distance, speed)
         elif command == "rotate":
             angle = float(input("Enter angle: "))
             speed = float(input("Enter speed: "))
-            miggy.rotate(angle, speed)
+            miggy.rotate_angle(angle, speed)
 except KeyboardInterrupt:
     miggy.stop()
+    print("Exiting... Thanks for using MiggyOS!")
 
 
 

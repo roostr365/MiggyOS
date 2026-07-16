@@ -4,10 +4,7 @@ from LocomotionDriver import LocomotionDriver
 
 class Miggy:
 	def __init__(self, interface):
-		try:
-			ChannelFactoryInitialize(0, interface)
-		except Exception as e:
-			print("Failed to connect! " + str(e))
+		ChannelFactoryInitialize(0, interface)
 		print("Connected Succesfully!")
 		self.client = LocoClient()
 		self.client.SetTimeout(10.0)
@@ -15,10 +12,10 @@ class Miggy:
 
 		self.locomotion = LocomotionDriver(self.client)
 
-	def move(self, distance, speed):
+	def move_dist(self, distance, speed):
 		self.locomotion.move_dist_sleep(distance, speed)
 
-	def rotate(self, angle, speed):
+	def rotate_angle(self, angle, speed):
 		self.locomotion.rotate_radians_sleep(angle, speed)
 
 	def stop(self):
