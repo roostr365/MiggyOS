@@ -414,23 +414,29 @@ class MiggyGUI:
 
     def poll_log_queue(self):
         """Poll the log queue and update console text widget.
-        Trims the console to a maximum number of lines to avoid X
-        "PolyRequestTooLarge" errors caused by excessive text size.
+        Trim the console to a maximum number of lines and ensure each
+        X request stays within a safe size. This prevents "PolyRequestTooLarge"
+        errors when large log messages are inserted rapidly.
         """
         MAX_LINES = 2000
+        MAX_CHUNK = 4096  # split large messages into manageable chunks
         try:
             while True:
                 msg = self.log_queue.get_nowait()
-                self.console_text.config(state=tk.NORMAL)
-                self.console_text.insert(tk.END, msg)
-                # Trim excess lines if over limit
-                line_count = int(self.console_text.index('end-1c').split('.')[0])
-                if line_count > MAX_LINES:
-                    # Delete the oldest lines to keep size bounded
-                    excess = line_count - MAX_LINES
-                    self.console_text.delete('1.0', f"{excess + 1}.0")
-                self.console_text.see(tk.END)
-                self.console_text.config(state=tk.DISABLED)
+                # Insert the message in chunks to avoid overly large X requests
+                start = 0
+                while start < len(msg):
+                    chunk = msg[start:start + MAX_CHUNK]
+                    self.console_text.config(state=tk.NORMAL)
+                    self.console_text.insert(tk.END, chunk)
+                    # Trim excess lines if over limit
+                    line_count = int(self.console_text.index('end-1c').split('.')[0])
+                    if line_count > MAX_LINES:
+                        excess = line_count - MAX_LINES
+                        self.console_text.delete('1.0', f"{excess + 1}.0")
+                    self.console_text.see(tk.END)
+                    self.console_text.config(state=tk.DISABLED)
+                    start += MAX_CHUNK
         except queue.Empty:
             pass
         self.after_id = self.root.after(100, self.poll_log_queue)
