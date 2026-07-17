@@ -44,12 +44,9 @@ class LocomotionDriver:
 		time.sleep(5)
 
 	def sit(self):
-		try:
-			self.client.Sit()
-		except Exception as e:
-			print("Sit not available, squatting instead: " + str(e))
-			self.client.StandUp2Squat()
-			time.sleep(5)
+	
+		self.client.StandUp2Squat()
+		time.sleep(5)
 
 	def damp(self):
 		self.client.Damp()

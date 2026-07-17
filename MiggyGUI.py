@@ -81,7 +81,7 @@ class MiggyGUI:
         self.connect_btn.grid(row=0, column=2, padx=5)
         self.disconnect_btn = ttk.Button(self.conn_frame, text="Disconnect", command=self.on_disconnect, state=tk.DISABLED)
         self.disconnect_btn.grid(row=0, column=3, padx=5)
-        self.status_label = ttk.Label(self.conn_frame, text="â— Disconnected", foreground="red")
+        self.status_label = ttk.Label(self.conn_frame, text="Disconnected", foreground="red")
         self.status_label.grid(row=0, column=4, padx=10)
 
         # Notebook (tabs)
@@ -90,28 +90,28 @@ class MiggyGUI:
 
         # Tab 1: AI Control
         self.ai_tab = ttk.Frame(self.notebook)
-        self.notebook.add(self.ai_tab, text="ðŸ¤– AI Control")
+        self.notebook.add(self.ai_tab, text="AI Control")
         self.build_ai_tab()
 
         # Tab 2: Manual Control
         self.manual_tab = ttk.Frame(self.notebook)
-        self.notebook.add(self.manual_tab, text="ðŸŽ® Manual Control")
+        self.notebook.add(self.manual_tab, text="Manual Control")
         self.build_manual_tab()
 
         # Tab 3: Status
         self.status_tab = ttk.Frame(self.notebook)
-        self.notebook.add(self.status_tab, text="ðŸ“Š Status")
+        self.notebook.add(self.status_tab, text="Status")
         self.build_status_tab()
 
         # Tab 4: Console
         self.console_tab = ttk.Frame(self.notebook)
-        self.notebook.add(self.console_tab, text="ðŸ’» Console")
+        self.notebook.add(self.console_tab, text="Console")
         self.build_console_tab()
 
         # Emergency stop button
         self.emergency_frame = ttk.Frame(self.main_frame)
         self.emergency_frame.pack(fill=tk.X, pady=5)
-        self.emergency_btn = ttk.Button(self.emergency_frame, text="ðŸ›‘ EMERGENCY STOP", command=self.emergency_stop,
+        self.emergency_btn = ttk.Button(self.emergency_frame, text="EMERGENCY STOP", command=self.emergency_stop,
                                         style="Emergency.TButton")
         self.emergency_btn.pack(side=tk.RIGHT)
 
@@ -136,7 +136,7 @@ class MiggyGUI:
         self.code_text.pack(fill=tk.BOTH, expand=True, pady=5)
 
         # Execute button
-        self.execute_btn = ttk.Button(self.ai_tab, text="â–¶ Execute Code", command=self.on_execute_code, state=tk.DISABLED)
+        self.execute_btn = ttk.Button(self.ai_tab, text="Execute Code", command=self.on_execute_code, state=tk.DISABLED)
         self.execute_btn.pack(pady=5)
 
     def build_manual_tab(self):
@@ -154,9 +154,9 @@ class MiggyGUI:
         self.speed_entry.grid(row=0, column=3, padx=5)
         self.speed_entry.insert(0, "0.5")
 
-        btn_forward = ttk.Button(move_frame, text="â¬† Forward", command=lambda: self.on_move_clicked(1))
+        btn_forward = ttk.Button(move_frame, text="Forward", command=lambda: self.on_move_clicked(1))
         btn_forward.grid(row=1, column=0, columnspan=2, pady=5, sticky=tk.W)
-        btn_backward = ttk.Button(move_frame, text="â¬‡ Backward", command=lambda: self.on_move_clicked(-1))
+        btn_backward = ttk.Button(move_frame, text="Backward", command=lambda: self.on_move_clicked(-1))
         btn_backward.grid(row=1, column=2, columnspan=2, pady=5, sticky=tk.W)
 
         # Rotation controls
@@ -173,9 +173,9 @@ class MiggyGUI:
         self.rot_speed_entry.grid(row=0, column=3, padx=5)
         self.rot_speed_entry.insert(0, "1.0")
 
-        btn_left = ttk.Button(rot_frame, text="â†º Left", command=lambda: self.on_rotate_clicked(1))
+        btn_left = ttk.Button(rot_frame, text="Left", command=lambda: self.on_rotate_clicked(1))
         btn_left.grid(row=1, column=0, columnspan=2, pady=5, sticky=tk.W)
-        btn_right = ttk.Button(rot_frame, text="â†» Right", command=lambda: self.on_rotate_clicked(-1))
+        btn_right = ttk.Button(rot_frame, text="Right", command=lambda: self.on_rotate_clicked(-1))
         btn_right.grid(row=1, column=2, columnspan=2, pady=5, sticky=tk.W)
 
         # Posture controls
@@ -291,7 +291,7 @@ class MiggyGUI:
         self.is_connected = True
         self.connect_btn.config(state=tk.DISABLED)
         self.disconnect_btn.config(state=tk.NORMAL)
-        self.status_label.config(text="â— Connected", foreground="green")
+        self.status_label.config(text="Connected", foreground="green")
         self.statusbar.config(text=f"Connected to {interface}")
         self.log_message(f"Connected to Miggy on {interface}")
         if ai_error:
@@ -321,7 +321,7 @@ class MiggyGUI:
         self.disconnect_btn.config(state=tk.DISABLED)
         self.execute_btn.config(state=tk.DISABLED)
         self.ai_send_btn.config(state=tk.NORMAL)
-        self.status_label.config(text="â— Disconnected", foreground="red")
+        self.status_label.config(text="Disconnected", foreground="red")
         self.statusbar.config(text="Disconnected")
         self.log_message("Disconnected from Miggy")
 
@@ -485,6 +485,7 @@ class MiggyGUI:
         def worker():
             try:
                 miggy.stop()
+                miggy.release_arm()
             except Exception as e:
                 self.log_message(f"Emergency stop error: {e}")
 
@@ -555,7 +556,7 @@ class MiggyGUI:
                             "MiggyOS Control Center\n"
                             "Version 1.0\n\n"
                             "Innovators: pickle69420 and roostr365\n"
-                            "Â© 2026 All Rights Reserved")
+                            "© 2026 All Rights Reserved")
 
     def on_close(self):
         self.on_disconnect()
