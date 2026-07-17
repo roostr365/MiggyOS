@@ -5,7 +5,7 @@ from unitree_sdk2py.core.channel import ChannelSubscriber
 class AudioDriver:
     def __init__(self, client: AudioClient):
         self.client = client
-        self.latest_message = String_(data="")
+        self.latest_message = None
 
         self.audio_msg_subscriber = ChannelSubscriber("rt/audio_msg", String_)
         self.audio_msg_subscriber.Init(self._callback, 10)
@@ -15,7 +15,7 @@ class AudioDriver:
 
     def _callback(self, msg: String_):
         self.latest_message = msg.data
-        print(self.latest_message)
+        #print(self.latest_message)
 
     def get_latest_message(self):
         try:
@@ -23,6 +23,8 @@ class AudioDriver:
             self.latest_message = None
             return message
         except Exception as e:
+            message = None
+            return message
             print("Audio empty " + str(e)) 
 
     def clear(self):

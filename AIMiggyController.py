@@ -3,7 +3,7 @@ from Miggy import Miggy
 import math
 import time
 
-reg_preprompt = """
+preprompt = """
 You are an autonomous controller for a Unitree G1 robot using the MiggyOS Python API.
 
 API
