@@ -1,4 +1,4 @@
-from openai import OpenAI, api_key
+from openai import OpenAI
 from Miggy import Miggy
 import math
 import time
@@ -97,7 +97,7 @@ class AIMiggy:
         code = self.askAIMiggy(query).output_text
         print(code)
         try:
-            input("code about to be executed: " + code + " Enter to accept") 
+            # Directly execute generated code; rely on the caller to provide the miggy instance
             exec(code)
         except Exception as e:
             print(str(e) + " Please try again.")

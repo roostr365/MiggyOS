@@ -19,17 +19,28 @@ class AudioDriver:
         #print(self.latest_message)
 
     def get_latest_message(self):
-        """Retrieve the latest audio message text, if available."""
+        """Retrieve the latest audio message text, if available.
+        Supports JSON strings or Python dict literal strings.
+        """
         if not self.latest_message:
             return None
+        # Try JSON first
         try:
             data = json.loads(self.latest_message)
-            message = data.get("text")
-            self.latest_message = None
-            return message
         except Exception:
-            self.latest_message = None
-            return None
+            # Fallback to Python literal evaluation (safer than eval)
+            try:
+                import ast
+                data = ast.literal_eval(self.latest_message)
+            except Exception:
+                self.latest_message = None
+                return None
+        # Extract text field if present
+        message = None
+        if isinstance(data, dict):
+            message = data.get("text")
+        self.latest_message = None
+        return message
 
     def clear(self):
         self.latest_message = None
