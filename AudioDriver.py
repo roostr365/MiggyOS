@@ -14,7 +14,7 @@ class AudioDriver:
         self.client.TtsMaker(str, lang)
 
     def _callback(self, msg: String_):
-        self.latest_message = msg.data
+        self.latest_message = msg.data["text"]
         print(self.latest_message)
 
     def get_latest_message(self):

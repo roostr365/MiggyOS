@@ -6,7 +6,7 @@ import time
 class TerminalInterface:
 
     @staticmethod
-    def main(self, miggy, aimiggy):
+    def main(miggy, aimiggy):
         commands = {
             "quit": "Quit the MiggyOS",
             "move": "Move the robot forward",
