@@ -93,7 +93,7 @@ class AIMiggy:
 
     def run(self, query, miggy):
         code = self.askAIMiggy(query).output_text
-        print(code)
+        # print(code)  # Suppressed to avoid flooding the UI console
         try:
             input("code about to be executed: " + code + " Enter to accept")
             exec(code)

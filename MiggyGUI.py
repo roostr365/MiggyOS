@@ -419,8 +419,16 @@ class MiggyGUI:
         self.status_text.config(state=tk.DISABLED)
 
     def log_message(self, msg):
+        """Enqueue a log message, truncating if it exceeds a safe length.
+        This prevents overly large strings from overwhelming the X server.
+        """
+        MAX_LOG_LEN = 1024  # characters
+        # Ensure msg is a string
+        msg_str = str(msg)
+        if len(msg_str) > MAX_LOG_LEN:
+            msg_str = msg_str[:MAX_LOG_LEN] + "... [truncated]"
         timestamp = datetime.now().strftime("%H:%M:%S")
-        self.log_queue.put(f"[{timestamp}] {msg}\n")
+        self.log_queue.put(f"[{timestamp}] {msg_str}\n")
 
     def poll_log_queue(self):
         """Poll the log queue and update console text widget.
