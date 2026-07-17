@@ -5,6 +5,7 @@ from Miggy import Miggy
 from AIMiggyController import AIMiggy
 from Terminal import TerminalInterface
 from Audio import AudioInterface
+from MiggyGUI import main as gui_main
 
 aimiggy = AIMiggy()
 
@@ -14,10 +15,12 @@ try:
 except Exception as e:
     print("Failed to connect to the Miggy!!! " + str(e))
     sys.exit(1)
-selection = input("0 for TerminalOS and 1 for Audio")
+selection = input("0 for TerminalOS, 1 for Audio, 2 for GUI: ")
 if selection == "0":
     TerminalInterface.main(miggy, aimiggy)
 elif selection == "1":
     AudioInterface.main(miggy, aimiggy)
+elif selection == "2":
+    gui_main()
 else:
     print("Invalid selection, you sadly will not be able to use the Miggy.")
