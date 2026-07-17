@@ -1,11 +1,12 @@
-from Miggy import Miggy
-from AIMiggyController import AIMiggy
 import time
 
 class AudioInterface:
 
     @staticmethod
     def main(miggy, aimiggy):
+        if aimiggy is None:
+            print("AI is not available, cannot run the audio interface.")
+            return
         aimiggy.mode = 1
         running = True
         try:
@@ -17,3 +18,4 @@ class AudioInterface:
         except KeyboardInterrupt:
             miggy.stop()
             print("Miggy stopped, thanks for using MiggyOS.")
+

@@ -37,7 +37,7 @@ class Miggy:
 		self.locomotion.stop()
 
 	def rotate_and_move(self, move_speed, rotate_speed, distance, angle):
-		self.locomotion.move_and_rotate(move_speed, rotate_speed, distance, angle)
+		self.locomotion.move_and_rotate(distance, angle, move_speed, rotate_speed)
 
 	def sit(self):
 		self.locomotion.sit()
@@ -49,14 +49,18 @@ class Miggy:
 	def release_arm(self):
 		self.arm.release()
 
-	def run_special(self, command_str):
+	def run_special(self, action):
 		try:
-			self.arm.special(command_str)
+			self.arm.special(action)
 		except Exception as e:
 			print(str(e) + " given string not one of the special commands")
 
 	def say(self, string, language):
-		self.audio.say(string, {"english": 1, "chinese": 0}[language]) if language in ["chinese", "english"] else None
+		languages = {"english": 1, "chinese": 0}
+		if language in languages:
+			self.audio.say(string, languages[language])
+		else:
+			print("Unsupported language: " + language)
 
 	def check_audio(self):
 		return self.audio.get_latest_message()

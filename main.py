@@ -5,22 +5,27 @@ from Miggy import Miggy
 from AIMiggyController import AIMiggy
 from Terminal import TerminalInterface
 from Audio import AudioInterface
-from MiggyGUI import main as gui_main
 
-aimiggy = AIMiggy()
+if len(sys.argv) < 2:
+    print("Usage: python main.py <network interface> (e.g. python main.py eth0)")
+    sys.exit(1)
 
 try:
-    interface = sys.argv[1] if len(sys.argv) > 1 else "eth0"
-    miggy = Miggy(interface)
+    aimiggy = AIMiggy()
+except Exception as e:
+    print("AI unavailable: " + str(e))
+    aimiggy = None
+
+try:
+    miggy = Miggy(sys.argv[1])
 except Exception as e:
     print("Failed to connect to the Miggy!!! " + str(e))
     sys.exit(1)
-selection = input("0 for TerminalOS, 1 for Audio, 2 for GUI: ")
+selection = input("0 for TerminalOS and 1 for Audio: ")
 if selection == "0":
     TerminalInterface.main(miggy, aimiggy)
 elif selection == "1":
     AudioInterface.main(miggy, aimiggy)
-elif selection == "2":
-    gui_main()
 else:
     print("Invalid selection, you sadly will not be able to use the Miggy.")
+

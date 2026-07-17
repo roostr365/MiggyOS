@@ -3,33 +3,36 @@ from tkinter import ttk, scrolledtext, messagebox
 import threading
 import queue
 import sys
+import math
 import time
 from datetime import datetime
-import math
 
-# Import existing modules
-# from Miggy import Miggy
-# from AIMiggyController import AIMiggy
+# Robot and AI support are optional at import time so the GUI can still open
+# on machines without the Unitree SDK or an API key configured.
+try:
+    from Miggy import Miggy
+    MIGGY_IMPORT_ERROR = None
+except Exception as _e:
+    Miggy = None
+    MIGGY_IMPORT_ERROR = _e
+
+try:
+    from AIMiggyController import AIMiggy, strip_code_fences
+    AI_IMPORT_ERROR = None
+except Exception as _e:
+    AIMiggy = None
+    strip_code_fences = None
+    AI_IMPORT_ERROR = _e
+
 
 class ConsoleRedirector:
-    def __init__(self, text_widget, queue, max_len=2048):
-        self.text_widget = text_widget
+    def __init__(self, queue):
         self.queue = queue
-        self.max_len = max_len
 
     def write(self, msg):
-        # Discard empty messages
-        if not msg:
-            return
-        # Truncate overly long messages to avoid huge X render requests
-        if len(msg) > self.max_len:
-            truncated = msg[:self.max_len] + "... [truncated]\n"
-            self.queue.put(truncated)
-        else:
-            self.queue.put(msg)
+        self.queue.put(msg)
 
     def flush(self):
-        # Required for file‑like interface; no action needed
         pass
 
 
@@ -44,7 +47,6 @@ class MiggyGUI:
         self.miggy = None
         self.aimiggy = None
         self.is_connected = False
-        self.worker_thread = None
         self.running_operation = False
         self.log_queue = queue.Queue()
         self.after_id = None
@@ -55,8 +57,10 @@ class MiggyGUI:
         self.setup_statusbar()
 
         # Redirect stdout/stderr to console
-        sys.stdout = ConsoleRedirector(self.console_text, self.log_queue)
-        sys.stderr = ConsoleRedirector(self.console_text, self.log_queue)
+        self._orig_stdout = sys.stdout
+        self._orig_stderr = sys.stderr
+        sys.stdout = ConsoleRedirector(self.log_queue)
+        sys.stderr = ConsoleRedirector(self.log_queue)
 
         # Start log polling
         self.poll_log_queue()
@@ -77,7 +81,7 @@ class MiggyGUI:
         self.connect_btn.grid(row=0, column=2, padx=5)
         self.disconnect_btn = ttk.Button(self.conn_frame, text="Disconnect", command=self.on_disconnect, state=tk.DISABLED)
         self.disconnect_btn.grid(row=0, column=3, padx=5)
-        self.status_label = ttk.Label(self.conn_frame, text="● Disconnected", foreground="red")
+        self.status_label = ttk.Label(self.conn_frame, text="â— Disconnected", foreground="red")
         self.status_label.grid(row=0, column=4, padx=10)
 
         # Notebook (tabs)
@@ -86,28 +90,28 @@ class MiggyGUI:
 
         # Tab 1: AI Control
         self.ai_tab = ttk.Frame(self.notebook)
-        self.notebook.add(self.ai_tab, text="🤖 AI Control")
+        self.notebook.add(self.ai_tab, text="ðŸ¤– AI Control")
         self.build_ai_tab()
 
         # Tab 2: Manual Control
         self.manual_tab = ttk.Frame(self.notebook)
-        self.notebook.add(self.manual_tab, text="🎮 Manual Control")
+        self.notebook.add(self.manual_tab, text="ðŸŽ® Manual Control")
         self.build_manual_tab()
 
         # Tab 3: Status
         self.status_tab = ttk.Frame(self.notebook)
-        self.notebook.add(self.status_tab, text="📊 Status")
+        self.notebook.add(self.status_tab, text="ðŸ“Š Status")
         self.build_status_tab()
 
         # Tab 4: Console
         self.console_tab = ttk.Frame(self.notebook)
-        self.notebook.add(self.console_tab, text="💻 Console")
+        self.notebook.add(self.console_tab, text="ðŸ’» Console")
         self.build_console_tab()
 
         # Emergency stop button
         self.emergency_frame = ttk.Frame(self.main_frame)
         self.emergency_frame.pack(fill=tk.X, pady=5)
-        self.emergency_btn = ttk.Button(self.emergency_frame, text="🛑 EMERGENCY STOP", command=self.emergency_stop,
+        self.emergency_btn = ttk.Button(self.emergency_frame, text="ðŸ›‘ EMERGENCY STOP", command=self.emergency_stop,
                                         style="Emergency.TButton")
         self.emergency_btn.pack(side=tk.RIGHT)
 
@@ -122,6 +126,7 @@ class MiggyGUI:
         ttk.Label(frame_query, text="Command:").pack(side=tk.LEFT)
         self.ai_entry = ttk.Entry(frame_query)
         self.ai_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
+        self.ai_entry.bind("<Return>", lambda event: self.on_ai_send())
         self.ai_send_btn = ttk.Button(frame_query, text="Generate Code", command=self.on_ai_send)
         self.ai_send_btn.pack(side=tk.LEFT)
 
@@ -131,7 +136,7 @@ class MiggyGUI:
         self.code_text.pack(fill=tk.BOTH, expand=True, pady=5)
 
         # Execute button
-        self.execute_btn = ttk.Button(self.ai_tab, text="▶ Execute Code", command=self.on_execute_code, state=tk.DISABLED)
+        self.execute_btn = ttk.Button(self.ai_tab, text="â–¶ Execute Code", command=self.on_execute_code, state=tk.DISABLED)
         self.execute_btn.pack(pady=5)
 
     def build_manual_tab(self):
@@ -149,9 +154,9 @@ class MiggyGUI:
         self.speed_entry.grid(row=0, column=3, padx=5)
         self.speed_entry.insert(0, "0.5")
 
-        btn_forward = ttk.Button(move_frame, text="⬆ Forward", command=lambda: self.manual_move(float(self.dist_entry.get()), float(self.speed_entry.get())))
+        btn_forward = ttk.Button(move_frame, text="â¬† Forward", command=lambda: self.on_move_clicked(1))
         btn_forward.grid(row=1, column=0, columnspan=2, pady=5, sticky=tk.W)
-        btn_backward = ttk.Button(move_frame, text="⬇ Backward", command=lambda: self.manual_move(-float(self.dist_entry.get()), float(self.speed_entry.get())))
+        btn_backward = ttk.Button(move_frame, text="â¬‡ Backward", command=lambda: self.on_move_clicked(-1))
         btn_backward.grid(row=1, column=2, columnspan=2, pady=5, sticky=tk.W)
 
         # Rotation controls
@@ -168,9 +173,9 @@ class MiggyGUI:
         self.rot_speed_entry.grid(row=0, column=3, padx=5)
         self.rot_speed_entry.insert(0, "1.0")
 
-        btn_left = ttk.Button(rot_frame, text="↺ Left", command=lambda: self.manual_rotate(math.radians(float(self.angle_entry.get())), float(self.rot_speed_entry.get())))
+        btn_left = ttk.Button(rot_frame, text="â†º Left", command=lambda: self.on_rotate_clicked(1))
         btn_left.grid(row=1, column=0, columnspan=2, pady=5, sticky=tk.W)
-        btn_right = ttk.Button(rot_frame, text="↻ Right", command=lambda: self.manual_rotate(-math.radians(float(self.angle_entry.get())), -float(self.rot_speed_entry.get())))
+        btn_right = ttk.Button(rot_frame, text="â†» Right", command=lambda: self.on_rotate_clicked(-1))
         btn_right.grid(row=1, column=2, columnspan=2, pady=5, sticky=tk.W)
 
         # Posture controls
@@ -231,7 +236,7 @@ class MiggyGUI:
         file_menu.add_command(label="Connect...", command=self.on_connect)
         file_menu.add_command(label="Disconnect", command=self.on_disconnect)
         file_menu.add_separator()
-        file_menu.add_command(label="Exit", command=self.on_exit)
+        file_menu.add_command(label="Exit", command=self.on_close)
         menubar.add_cascade(label="File", menu=file_menu)
 
         help_menu = tk.Menu(menubar, tearoff=0)
@@ -252,21 +257,54 @@ class MiggyGUI:
         if not interface:
             messagebox.showerror("Error", "Interface cannot be empty.")
             return
-        try:
-            self.statusbar.config(text="Connecting...")
-            #self.miggy = Miggy(interface)
-            #self.aimiggy = AIMiggy()
-            self.is_connected = True
-            self.connect_btn.config(state=tk.DISABLED)
-            self.disconnect_btn.config(state=tk.NORMAL)
-            self.status_label.config(text="● Connected", foreground="green")
-            self.statusbar.config(text=f"Connected to {interface}")
-            self.log_message(f"Connected to Miggy on {interface}")
-            # Enable controls (already enabled by default)
-        except Exception as e:
-            messagebox.showerror("Connection Error", f"Failed to connect: {str(e)}")
-            self.log_message(f"Connection failed: {str(e)}")
-            self.statusbar.config(text="Connection failed")
+        if Miggy is None:
+            messagebox.showerror("Error",
+                                 "Robot support is unavailable (is unitree_sdk2py installed?):\n"
+                                 f"{MIGGY_IMPORT_ERROR}")
+            return
+        self.connect_btn.config(state=tk.DISABLED)
+        self.statusbar.config(text="Connecting...")
+
+        # Connect in a background thread so DDS init doesn't freeze the GUI
+        def worker():
+            try:
+                miggy = Miggy(interface)
+            except Exception as e:
+                self.root.after(0, self.on_connect_failed, str(e))
+                return
+            aimiggy = None
+            ai_error = None
+            if AIMiggy is not None:
+                try:
+                    aimiggy = AIMiggy()
+                except Exception as e:
+                    ai_error = str(e)
+            else:
+                ai_error = str(AI_IMPORT_ERROR)
+            self.root.after(0, self.on_connect_success, miggy, aimiggy, ai_error, interface)
+
+        threading.Thread(target=worker, daemon=True).start()
+
+    def on_connect_success(self, miggy, aimiggy, ai_error, interface):
+        self.miggy = miggy
+        self.aimiggy = aimiggy
+        self.is_connected = True
+        self.connect_btn.config(state=tk.DISABLED)
+        self.disconnect_btn.config(state=tk.NORMAL)
+        self.status_label.config(text="â— Connected", foreground="green")
+        self.statusbar.config(text=f"Connected to {interface}")
+        self.log_message(f"Connected to Miggy on {interface}")
+        if ai_error:
+            self.ai_send_btn.config(state=tk.DISABLED)
+            self.log_message(f"AI control unavailable: {ai_error}")
+        else:
+            self.ai_send_btn.config(state=tk.NORMAL)
+
+    def on_connect_failed(self, error):
+        self.connect_btn.config(state=tk.NORMAL)
+        self.statusbar.config(text="Connection failed")
+        self.log_message(f"Connection failed: {error}")
+        messagebox.showerror("Connection Error", f"Failed to connect: {error}")
 
     def on_disconnect(self):
         if not self.is_connected:
@@ -274,27 +312,27 @@ class MiggyGUI:
         try:
             if self.miggy:
                 self.miggy.stop()
-        except:
+        except Exception:
             pass
         self.is_connected = False
         self.miggy = None
         self.aimiggy = None
         self.connect_btn.config(state=tk.NORMAL)
         self.disconnect_btn.config(state=tk.DISABLED)
-        self.status_label.config(text="● Disconnected", foreground="red")
+        self.execute_btn.config(state=tk.DISABLED)
+        self.ai_send_btn.config(state=tk.NORMAL)
+        self.status_label.config(text="â— Disconnected", foreground="red")
         self.statusbar.config(text="Disconnected")
         self.log_message("Disconnected from Miggy")
-
-    def on_exit(self):
-        if self.worker_thread and self.worker_thread.is_alive():
-            self.running_operation = False
-            self.worker_thread.join(timeout=1)
-        self.on_disconnect()
-        self.root.quit()
 
     def on_ai_send(self):
         if not self.is_connected:
             messagebox.showerror("Error", "Not connected to robot.")
+            return
+        if self.aimiggy is None:
+            messagebox.showerror("Error",
+                                 "AI control is unavailable. Check that the openai package is "
+                                 "installed and NVIDIA_API_KEY is set.")
             return
         query = self.ai_entry.get().strip()
         if not query:
@@ -302,20 +340,31 @@ class MiggyGUI:
             return
         self.ai_send_btn.config(state=tk.DISABLED)
         self.statusbar.config(text="Generating code...")
-        try:
-            # Ask AI for code
-            #response = self.aimiggy.askAIMiggy(query)
-            code = response.output_text.strip()
-            self.code_text.delete(1.0, tk.END)
-            self.code_text.insert(tk.END, code)
-            self.execute_btn.config(state=tk.NORMAL)
-            self.statusbar.config(text="Code generated. Review and execute.")
-            self.log_message(f"AI generated code for: {query}")
-        except Exception as e:
-            messagebox.showerror("AI Error", f"Failed to generate code: {str(e)}")
-            self.statusbar.config(text="AI generation failed")
-            self.log_message(f"AI error: {str(e)}")
+
+        # Network call runs in a background thread so the GUI stays responsive
+        def worker():
+            try:
+                response = self.aimiggy.askAIMiggy(query)
+                code = strip_code_fences(response.output_text)
+                self.root.after(0, self.on_ai_response, query, code)
+            except Exception as e:
+                self.root.after(0, self.on_ai_error, str(e))
+
+        threading.Thread(target=worker, daemon=True).start()
+
+    def on_ai_response(self, query, code):
+        self.code_text.delete(1.0, tk.END)
+        self.code_text.insert(tk.END, code)
+        self.execute_btn.config(state=tk.NORMAL)
         self.ai_send_btn.config(state=tk.NORMAL)
+        self.statusbar.config(text="Code generated. Review and execute.")
+        self.log_message(f"AI generated code for: {query}")
+
+    def on_ai_error(self, error):
+        self.ai_send_btn.config(state=tk.NORMAL)
+        self.statusbar.config(text="AI generation failed")
+        self.log_message(f"AI error: {error}")
+        messagebox.showerror("AI Error", f"Failed to generate code: {error}")
 
     def on_execute_code(self):
         if not self.is_connected:
@@ -343,7 +392,33 @@ class MiggyGUI:
     def on_execute_done(self, msg):
         self.statusbar.config(text=msg)
         self.execute_btn.config(state=tk.NORMAL)
-        # Optionally show message
+
+    def parse_float_entries(self, *fields):
+        """Read (entry, name) pairs as floats; show an error and return None on bad input."""
+        values = []
+        for entry, name in fields:
+            try:
+                values.append(float(entry.get()))
+            except ValueError:
+                messagebox.showerror("Error", f"{name} must be a number.")
+                return None
+        return values
+
+    def on_move_clicked(self, direction):
+        values = self.parse_float_entries((self.dist_entry, "Distance"),
+                                          (self.speed_entry, "Speed"))
+        if values is None:
+            return
+        distance, speed = values
+        self.manual_move(direction * abs(distance), abs(speed))
+
+    def on_rotate_clicked(self, direction):
+        values = self.parse_float_entries((self.angle_entry, "Angle"),
+                                          (self.rot_speed_entry, "Rotation speed"))
+        if values is None:
+            return
+        angle, speed = values
+        self.manual_rotate(direction * math.radians(abs(angle)), abs(speed))
 
     def manual_move(self, distance, speed):
         if not self.is_connected:
@@ -401,9 +476,19 @@ class MiggyGUI:
         self.log_message(f"Say: '{text}' in {lang}")
 
     def emergency_stop(self):
-        if not self.is_connected:
+        if not self.is_connected or not self.miggy:
             return
-        self.run_in_thread(self.miggy.stop)
+        # Deliberately bypasses run_in_thread: the stop must fire even (especially)
+        # while another operation is in progress.
+        miggy = self.miggy
+
+        def worker():
+            try:
+                miggy.stop()
+            except Exception as e:
+                self.log_message(f"Emergency stop error: {e}")
+
+        threading.Thread(target=worker, daemon=True).start()
         self.log_message("EMERGENCY STOP issued.")
         self.statusbar.config(text="Emergency Stop")
 
@@ -423,35 +508,16 @@ class MiggyGUI:
         self.log_queue.put(f"[{timestamp}] {msg}\n")
 
     def poll_log_queue(self):
-        """Poll the log queue and update console text widget.
-        Consolidates multiple queued messages into one insertion per poll
-        and enforces a line limit to keep the X Render request size low.
-        """
-        MAX_LINES = 2000
-        MAX_CHUNK = 4096
+        """Poll the log queue and update console text widget."""
         try:
-            # Gather all pending messages
-            msgs = []
             while True:
-                msgs.append(self.log_queue.get_nowait())
-        except queue.Empty:
-            # No more messages
-            msgs = []
-        if msgs:
-            combined = ''.join(msgs)
-            start = 0
-            while start < len(combined):
-                chunk = combined[start:start + MAX_CHUNK]
+                msg = self.log_queue.get_nowait()
                 self.console_text.config(state=tk.NORMAL)
-                self.console_text.insert(tk.END, chunk)
-                # Trim excess lines if over limit
-                line_count = int(self.console_text.index('end-1c').split('.')[0])
-                if line_count > MAX_LINES:
-                    excess = line_count - MAX_LINES
-                    self.console_text.delete('1.0', f"{excess + 1}.0")
+                self.console_text.insert(tk.END, msg)
                 self.console_text.see(tk.END)
                 self.console_text.config(state=tk.DISABLED)
-                start += MAX_CHUNK
+        except queue.Empty:
+            pass
         self.after_id = self.root.after(100, self.poll_log_queue)
 
     def clear_console(self):
@@ -489,11 +555,16 @@ class MiggyGUI:
                             "MiggyOS Control Center\n"
                             "Version 1.0\n\n"
                             "Innovators: pickle69420 and roostr365\n"
-                            "© 2026 All Rights Reserved")
+                            "Â© 2026 All Rights Reserved")
+
     def on_close(self):
+        self.on_disconnect()
+        sys.stdout = self._orig_stdout
+        sys.stderr = self._orig_stderr
         if self.after_id:
             self.root.after_cancel(self.after_id)
-        self.on_exit()
+            self.after_id = None
+        self.root.destroy()
 
 def main():
     root = tk.Tk()
@@ -503,3 +574,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

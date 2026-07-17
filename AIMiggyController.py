@@ -1,8 +1,7 @@
-from openai import OpenAI, api_key
-from Miggy import Miggy
 import math
 import time
-import os
+
+from openai import OpenAI
 
 preprompt = """
 You are an autonomous controller for a Unitree G1 robot using the MiggyOS Python API.
@@ -66,15 +65,33 @@ User: Walk forward 2 meters
 miggy.move_dist(2.0, 0.5)
 
 User: Turn right 90 degrees then walk 1 meter
-miggy.rotate_angle(math.radians(-90), -1.0); time.sleep(...); miggy.move_dist(1.0, 0.5)
+miggy.rotate_angle(math.radians(-90), -1.0); time.sleep(2.0); miggy.move_dist(1.0, 0.5)
 """
+
+
+def strip_code_fences(text):
+    """Remove markdown ``` fences if the model wrapped its code in them."""
+    text = text.strip()
+    if text.startswith("```"):
+        lines = text.splitlines()[1:]
+        if lines and lines[-1].strip() == "```":
+            lines = lines[:-1]
+        text = "\n".join(lines).strip()
+    return text
+
 
 class AIMiggy:
 
     def __init__(self):
+        api_key = "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"
+        if not api_key:
+            raise RuntimeError(
+                "NVIDIA_API_KEY environment variable is not set. "
+                "Create a key at https://build.nvidia.com and run: export NVIDIA_API_KEY=<your key>"
+            )
         self.client = OpenAI(
             base_url="https://integrate.api.nvidia.com/v1",
-            api_key="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"
+            api_key=api_key
         )
 
         self.mode = 0
@@ -92,14 +109,11 @@ class AIMiggy:
         return response
 
     def run(self, query, miggy):
-        code = self.askAIMiggy(query).output_text
+        code = strip_code_fences(self.askAIMiggy(query).output_text)
         print(code)
         try:
-            input("code about to be executed: " + code + " Enter to accept")
-            exec(code)
+            input("code about to be executed:\n" + code + "\nEnter to accept ")
+            exec(code, {"miggy": miggy, "math": math, "time": time})
         except Exception as e:
             print(str(e) + " Please try again.")
-
-#aim = AIMiggy()
-#aim.run("Please walk forward 2 meters and turn around")
 
