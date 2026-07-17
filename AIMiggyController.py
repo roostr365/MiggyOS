@@ -2,6 +2,7 @@ from openai import OpenAI, api_key
 from Miggy import Miggy
 import math
 import time
+import os
 
 preprompt = """
 You are an autonomous controller for a Unitree G1 robot using the MiggyOS Python API.
@@ -73,8 +74,10 @@ class AIMiggy:
     def __init__(self):
         self.client = OpenAI(
             base_url="https://integrate.api.nvidia.com/v1",
-            api_key="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"
+            api_key=os.getenv("NVAPI_KEY")
         )
+        if not self.client.api_key:
+            raise ValueError("NVAPI_KEY environment variable not set")
         
         self.mode = 0
 

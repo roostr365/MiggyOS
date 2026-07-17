@@ -8,5 +8,8 @@ class ArmDriver:
     def release(self):
         self.client.ExecuteAction(action_map.get("release arm"))
 
-    def special(self, str):
-        self.client.ExecuteAction(action_map.get(str))
+    def special(self, command_str):
+        action = action_map.get(command_str)
+        if action is None:
+            raise ValueError(f"Invalid special command: {command_str}")
+        self.client.ExecuteAction(action)

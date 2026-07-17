@@ -15,6 +15,7 @@ class TerminalInterface:
             "sit": "Sit the robot down",
             "stand": "Stand the robot up",
             "audio": "Listen for a command and give to AI",
+            "say": "Make the robot speak a phrase",
             "custom": "Use AI to run the robot DANGEROUS WARNING MAY CAUSE ARMAGEDDON AND THE RESURRECTION OF THE TERMINATOR AND ERASURE OF THE HUMAN RACE. USE WITH EXTREME CAUTION. Thanks for using MiggyOS!"
         }
 

@@ -9,7 +9,8 @@ from Audio import AudioInterface
 aimiggy = AIMiggy()
 
 try:
-    miggy = Miggy(sys.argv[1])
+    interface = sys.argv[1] if len(sys.argv) > 1 else "eth0"
+    miggy = Miggy(interface)
 except Exception as e:
     print("Failed to connect to the Miggy!!! " + str(e))
     sys.exit(1)

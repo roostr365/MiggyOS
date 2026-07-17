@@ -49,9 +49,9 @@ class Miggy:
 	def release_arm(self):
 		self.arm.release()
 
-	def run_special(self, str):
+	def run_special(self, command_str):
 		try:
-			self.arm.special(str)
+			self.arm.special(command_str)
 		except Exception as e:
 			print(str(e) + " given string not one of the special commands")
 
