@@ -413,12 +413,22 @@ class MiggyGUI:
         self.log_queue.put(f"[{timestamp}] {msg}\n")
 
     def poll_log_queue(self):
-        """Poll the log queue and update console text widget."""
+        """Poll the log queue and update console text widget.
+        Trims the console to a maximum number of lines to avoid X
+        "PolyRequestTooLarge" errors caused by excessive text size.
+        """
+        MAX_LINES = 2000
         try:
             while True:
                 msg = self.log_queue.get_nowait()
                 self.console_text.config(state=tk.NORMAL)
                 self.console_text.insert(tk.END, msg)
+                # Trim excess lines if over limit
+                line_count = int(self.console_text.index('end-1c').split('.')[0])
+                if line_count > MAX_LINES:
+                    # Delete the oldest lines to keep size bounded
+                    excess = line_count - MAX_LINES
+                    self.console_text.delete('1.0', f"{excess + 1}.0")
                 self.console_text.see(tk.END)
                 self.console_text.config(state=tk.DISABLED)
         except queue.Empty:
