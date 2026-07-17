@@ -12,14 +12,24 @@ import math
 # from AIMiggyController import AIMiggy
 
 class ConsoleRedirector:
-    def __init__(self, text_widget, queue):
+    def __init__(self, text_widget, queue, max_len=2048):
         self.text_widget = text_widget
         self.queue = queue
+        self.max_len = max_len
 
     def write(self, msg):
-        self.queue.put(msg)
+        # Discard empty messages
+        if not msg:
+            return
+        # Truncate overly long messages to avoid huge X render requests
+        if len(msg) > self.max_len:
+            truncated = msg[:self.max_len] + "... [truncated]\n"
+            self.queue.put(truncated)
+        else:
+            self.queue.put(msg)
 
     def flush(self):
+        # Required for file‑like interface; no action needed
         pass
 
 
