@@ -18,12 +18,12 @@ class AudioDriver:
         print(self.latest_message)
 
     def get_latest_message(self):
-    	try:
-    	    message = eval(self.latest_message.data)["text"]
+        try:
+            message = eval(self.latest_message.data)["text"]
+            self.latest_message = None
+            return message
         except Exception as e:
-            print("Audio empty " + str(e))
-        self.latest_message = None
-        return message
+            print("Audio empty " + str(e)) 
 
     def clear(self):
         self.latest_message = None
