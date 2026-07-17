@@ -56,6 +56,10 @@ class TerminalInterface:
                         time.sleep(1)
                         command = miggy.check_audio()
                     aimiggy.run(command, miggy)
+                elif command == "say":
+                    lang = input("Input lanugage (english / chinese): ")
+                    text = input("Input message: ")
+                    miggy.say(text, lang)
 
         except KeyboardInterrupt:
             miggy.stop()
