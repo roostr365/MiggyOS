@@ -6,6 +6,7 @@ class AudioInterface:
 
     @staticmethod
     def main(miggy, aimiggy):
+    	aimiggy.mode = 1
         running = True
         try:
             while running:

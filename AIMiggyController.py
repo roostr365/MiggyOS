@@ -3,7 +3,7 @@ from Miggy import Miggy
 import math
 import time
 
-preprompt = """
+reg_preprompt = """
 You are an autonomous controller for a Unitree G1 robot using the MiggyOS Python API.
 
 API
@@ -75,6 +75,8 @@ class AIMiggy:
             base_url="https://integrate.api.nvidia.com/v1",
             api_key="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"
         )
+        
+        self.mode = 0
 
     def askAIMiggy(self, query):
         response = self.client.responses.create(
@@ -96,7 +98,6 @@ class AIMiggy:
             exec(code)
         except Exception as e:
             print(str(e) + " Please try again.")
-
 
 #aim = AIMiggy()
 #aim.run("Please walk forward 2 meters and turn around")
