@@ -3,10 +3,9 @@ from AIMiggyController import AIMiggy
 import time
 
 class AudioInterface:
-
     @staticmethod
     def main(miggy, aimiggy):
-    	aimiggy.mode = 1
+        # removed aimiggy.mode = 1
         running = True
         try:
             while running:
