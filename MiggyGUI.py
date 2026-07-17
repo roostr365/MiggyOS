@@ -8,8 +8,8 @@ from datetime import datetime
 import math
 
 # Import existing modules
-from Miggy import Miggy
-from AIMiggyController import AIMiggy
+# from Miggy import Miggy
+# from AIMiggyController import AIMiggy
 
 class ConsoleRedirector:
     def __init__(self, text_widget, queue):
@@ -244,8 +244,8 @@ class MiggyGUI:
             return
         try:
             self.statusbar.config(text="Connecting...")
-            self.miggy = Miggy(interface)
-            self.aimiggy = AIMiggy()
+            #self.miggy = Miggy(interface)
+            #self.aimiggy = AIMiggy()
             self.is_connected = True
             self.connect_btn.config(state=tk.DISABLED)
             self.disconnect_btn.config(state=tk.NORMAL)
@@ -294,7 +294,7 @@ class MiggyGUI:
         self.statusbar.config(text="Generating code...")
         try:
             # Ask AI for code
-            response = self.aimiggy.askAIMiggy(query)
+            #response = self.aimiggy.askAIMiggy(query)
             code = response.output_text.strip()
             self.code_text.delete(1.0, tk.END)
             self.code_text.insert(tk.END, code)
